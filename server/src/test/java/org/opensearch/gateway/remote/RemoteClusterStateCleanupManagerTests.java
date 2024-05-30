@@ -159,11 +159,13 @@ public class RemoteClusterStateCleanupManagerTests extends OpenSearchTestCase {
         List<BlobMetadata> inactiveBlobs = Arrays.asList(
             new PlainBlobMetadata("manifest1.dat", 1L),
             new PlainBlobMetadata("manifest2.dat", 1L),
-            new PlainBlobMetadata("manifest3.dat", 1L)
+            new PlainBlobMetadata("manifest3.dat", 1L),
+            new PlainBlobMetadata("manifest6.dat", 1L)
         );
         List<BlobMetadata> activeBlobs = Arrays.asList(
             new PlainBlobMetadata("manifest4.dat", 1L),
-            new PlainBlobMetadata("manifest5.dat", 1L)
+            new PlainBlobMetadata("manifest5.dat", 1L),
+            new PlainBlobMetadata("manifest7.dat", 1L)
         );
         UploadedIndexMetadata index1Metadata = new UploadedIndexMetadata("index1", "indexUUID1", "index_metadata1");
         UploadedIndexMetadata index2Metadata = new UploadedIndexMetadata("index2", "indexUUID2", "index_metadata2");
@@ -200,6 +202,39 @@ public class RemoteClusterStateCleanupManagerTests extends OpenSearchTestCase {
             .settingMetadata(settingMetadataUpdated)
             .build();
 
+        List<UploadedIndexMetadata> indicesRouting1 = List.of(index1Metadata, index2Metadata);
+        List<UploadedIndexMetadata> indicesRouting2 = List.of(index1Metadata);
+        ClusterMetadataManifest manifest6 = ClusterMetadataManifest.builder()
+            .indices(List.of(index1UpdatedMetadata))
+            .globalMetadataFileName("global_metadata")
+            .clusterTerm(1L)
+            .stateVersion(1L)
+            .codecVersion(CODEC_V3)
+            .stateUUID(randomAlphaOfLength(10))
+            .clusterUUID(clusterUUID)
+            .nodeId("nodeA")
+            .opensearchVersion(VersionUtils.randomOpenSearchVersion(random()))
+            .previousClusterUUID(ClusterState.UNKNOWN_UUID)
+            .committed(true)
+            .routingTableVersion(0L)
+            .indicesRouting(indicesRouting1)
+            .build();
+        ClusterMetadataManifest manifest7 = ClusterMetadataManifest.builder()
+            .indices(List.of(index1UpdatedMetadata))
+            .globalMetadataFileName("global_metadata")
+            .clusterTerm(1L)
+            .stateVersion(1L)
+            .codecVersion(CODEC_V3)
+            .stateUUID(randomAlphaOfLength(10))
+            .clusterUUID(clusterUUID)
+            .nodeId("nodeA")
+            .opensearchVersion(VersionUtils.randomOpenSearchVersion(random()))
+            .previousClusterUUID(ClusterState.UNKNOWN_UUID)
+            .committed(true)
+            .routingTableVersion(0L)
+            .indicesRouting(indicesRouting2)
+            .build();
+
         // active manifest have reference to index1Updated, index2, settingsUpdated, coordinationUpdated, templates, templatesUpdated
         ClusterMetadataManifest manifest4 = ClusterMetadataManifest.builder(manifest3)
             .coordinationMetadata(coordinationMetadataUpdated)
@@ -209,7 +244,7 @@ public class RemoteClusterStateCleanupManagerTests extends OpenSearchTestCase {
             .build();
 
         when(remoteClusterStateService.getRemoteManifestManager().fetchRemoteClusterMetadataManifest(eq(clusterName), eq(clusterUUID), any()))
-            .thenReturn(manifest4, manifest5, manifest1, manifest2, manifest3);
+            .thenReturn(manifest4, manifest5, manifest1, manifest2, manifest3, manifest6, manifest7);
         BlobContainer container = mock(BlobContainer.class);
         when(blobStore.blobContainer(any())).thenReturn(container);
         doNothing().when(container).deleteBlobsIgnoringIfNotExists(any());
@@ -223,6 +258,7 @@ public class RemoteClusterStateCleanupManagerTests extends OpenSearchTestCase {
         verify(container).deleteBlobsIgnoringIfNotExists(
             List.of(new BlobPath().add(INDEX_PATH_TOKEN).add(index1Metadata.getIndexUUID()).buildAsString() + index1Metadata.getUploadedFilePath() + ".dat")
         );
+        verify(container).deleteBlobsIgnoringIfNotExists(List.of(new BlobPath().buildAsString() + index1Metadata.getUploadedFilename()));
         Set<String> staleManifest = new HashSet<>();
         inactiveBlobs.forEach(blob -> staleManifest.add(new BlobPath().add(MANIFEST_PATH_TOKEN).buildAsString() + blob.name()));
         verify(container).deleteBlobsIgnoringIfNotExists(new ArrayList<>(staleManifest));

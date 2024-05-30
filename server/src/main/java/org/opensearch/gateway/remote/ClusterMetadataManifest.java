@@ -852,6 +852,7 @@ public class ClusterMetadataManifest implements Writeable, ToXContentFragment {
         public Builder() {
             indices = new ArrayList<>();
             customMetadataMap = new HashMap<>();
+            indicesRouting = new ArrayList<>();
         }
 
         public Builder(ClusterMetadataManifest manifest) {
