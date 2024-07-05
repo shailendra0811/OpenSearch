@@ -67,12 +67,14 @@ import org.opensearch.telemetry.metrics.noop.NoopMetricsRegistry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Queue;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -100,6 +102,8 @@ public class AllocationService {
     private final ClusterInfoService clusterInfoService;
     private SnapshotsInfoService snapshotsInfoService;
     private final ClusterManagerMetrics clusterManagerMetrics;
+    private static final long MAX_ALLOCATION_BATCH_CAPACITY = 100;
+    private final Queue<Runnable> workQueue = new LinkedBlockingQueue<>();
 
     // only for tests that use the GatewayAllocator as the unique ExistingShardsAllocator
     public AllocationService(
@@ -616,11 +620,25 @@ public class AllocationService {
     }
 
     private void allocateAllUnassignedShards(RoutingAllocation allocation) {
-        ExistingShardsAllocator allocator = existingShardsAllocators.get(ShardsBatchGatewayAllocator.ALLOCATOR_NAME);
-        allocator.allocateAllUnassignedShards(allocation, true);
-        allocator.afterPrimariesBeforeReplicas(allocation);
-        // Replicas Assignment
-        allocator.allocateAllUnassignedShards(allocation, false);
+        if (workQueue.size() < MAX_ALLOCATION_BATCH_CAPACITY) {
+            ExistingShardsAllocator allocator = existingShardsAllocators.get(ShardsBatchGatewayAllocator.ALLOCATOR_NAME);
+            workQueue.addAll(allocator.allocateAllUnassignedShards(allocation, true));
+            workQueue.add(() -> allocator.afterPrimariesBeforeReplicas(allocation));
+            // Replicas Assignment
+            workQueue.addAll(allocator.allocateAllUnassignedShards(allocation, false));
+        }
+        processWorkItemQueue();
+    }
+
+    private void processWorkItemQueue() {
+        long startTime = System.nanoTime();
+        //TODO replace with max time
+        while (workQueue.isEmpty() == false && System.nanoTime() - startTime < Integer.MAX_VALUE) {
+            Runnable workItem = workQueue.poll();
+            if (workItem != null) {
+                workItem.run();
+            }
+        }
     }
 
     private void disassociateDeadNodes(RoutingAllocation allocation) {
