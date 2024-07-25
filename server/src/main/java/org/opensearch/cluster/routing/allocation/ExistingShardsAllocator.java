@@ -109,7 +109,7 @@ public interface ExistingShardsAllocator {
      *
      * Allocation service will currently run the default implementation of it implemented by {@link ShardsBatchGatewayAllocator}
      */
-    default List<Runnable> allocateAllUnassignedShards(RoutingAllocation allocation, boolean primary) {
+    default Runnable allocateAllUnassignedShards(RoutingAllocation allocation, boolean primary) {
         RoutingNodes.UnassignedShards.UnassignedIterator iterator = allocation.routingNodes().unassigned().iterator();
         List<Runnable> runnables = new ArrayList<>();
         while (iterator.hasNext()) {
@@ -118,7 +118,7 @@ public interface ExistingShardsAllocator {
                 runnables.add(() -> allocateUnassigned(shardRouting, allocation, iterator));
             }
         }
-        return runnables;
+        return () -> runnables.forEach(Runnable::run);
     }
 
     /**
