@@ -148,7 +148,11 @@ public class InternalRemoteRoutingTableService extends AbstractLifecycleComponen
                 term,
                 version
         );
-
+        if (remoteRoutingTableDiff.getDiffs().isEmpty()) {
+            logger.info("No index routing diff found, completing request");
+            latchedActionListener.onResponse(null);
+            return;
+        }
         ActionListener<Void> completionListener = ActionListener.wrap(
                 resp -> latchedActionListener.onResponse(remoteRoutingTableDiff.getUploadedMetadata()),
                 ex -> latchedActionListener.onFailure(
