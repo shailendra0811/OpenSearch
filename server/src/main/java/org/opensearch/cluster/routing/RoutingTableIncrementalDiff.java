@@ -15,6 +15,7 @@ import org.opensearch.core.common.io.stream.StreamOutput;
 import org.opensearch.core.index.Index;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -74,6 +75,10 @@ public class RoutingTableIncrementalDiff implements Diff<RoutingTable> {
     public void writeTo(StreamOutput out) throws IOException {
         out.writeLong(version);
         indicesRouting.writeTo(out);
+    }
+
+    public DiffableUtils.MapDiff<String, IndexRoutingTable, Map<String, IndexRoutingTable>> getIndicesRouting() {
+        return indicesRouting;
     }
 
     /**

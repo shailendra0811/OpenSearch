@@ -141,23 +141,24 @@ public class InternalRemoteRoutingTableService extends AbstractLifecycleComponen
         String clusterUUID,
         long term,
         long version,
-        Map<String, Diff<IndexRoutingTable>> indexRoutingTableDiff,
+        RoutingTable routingTableBefore,
+        RoutingTable routingTableAfter,
         LatchedActionListener<ClusterMetadataManifest.UploadedMetadata> latchedActionListener
     ) {
-        RoutingTableIncrementalDiff routingTableIncrementalDiff = null;//new RoutingTableIncrementalDiff(indexRoutingTableDiff);
+        RoutingTableIncrementalDiff routingTableIncrementalDiff = new RoutingTableIncrementalDiff(routingTableBefore, routingTableAfter);
         RemoteRoutingTableDiff remoteRoutingTableDiff = new RemoteRoutingTableDiff(
-            routingTableIncrementalDiff,
-            clusterUUID,
-            compressor,
-            term,
-            version
+                routingTableIncrementalDiff,
+                clusterUUID,
+                compressor,
+                term,
+                version
         );
 
         ActionListener<Void> completionListener = ActionListener.wrap(
-            resp -> latchedActionListener.onResponse(remoteRoutingTableDiff.getUploadedMetadata()),
-            ex -> latchedActionListener.onFailure(
-                new RemoteStateTransferException("Exception in writing index routing diff to remote store", ex)
-            )
+                resp -> latchedActionListener.onResponse(remoteRoutingTableDiff.getUploadedMetadata()),
+                ex -> latchedActionListener.onFailure(
+                        new RemoteStateTransferException("Exception in writing index routing diff to remote store", ex)
+                )
         );
 
         remoteRoutingTableDiffStore.writeAsync(remoteRoutingTableDiff, completionListener);
