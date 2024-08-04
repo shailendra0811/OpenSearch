@@ -32,8 +32,8 @@ import java.util.Map;
  */
 public interface RemoteRoutingTableService extends LifecycleComponent {
 
-    public static final DiffableUtils.DiffableValueSerializer<String, IndexRoutingTable> CUSTOM_ROUTING_TABLE_DIFFABLE_VALUE_SERIALIZER =
-        new DiffableUtils.DiffableValueSerializer<String, IndexRoutingTable>() {
+    DiffableUtils.DiffableValueSerializer<String, IndexRoutingTable> CUSTOM_ROUTING_TABLE_DIFFABLE_VALUE_SERIALIZER =
+        new DiffableUtils.DiffableValueSerializer<>() {
             @Override
             public IndexRoutingTable read(StreamInput in, String key) throws IOException {
                 return IndexRoutingTable.readFrom(in);
@@ -51,16 +51,7 @@ public interface RemoteRoutingTableService extends LifecycleComponent {
 
             @Override
             public Diff<IndexRoutingTable> diff(IndexRoutingTable currentState, IndexRoutingTable previousState) {
-                List<IndexShardRoutingTable> diffs = new ArrayList<>();
-                for (Map.Entry<Integer, IndexShardRoutingTable> entry : currentState.getShards().entrySet()) {
-                    Integer index = entry.getKey();
-                    IndexShardRoutingTable currentShardRoutingTable = entry.getValue();
-                    IndexShardRoutingTable previousShardRoutingTable = previousState.shard(index);
-                    if (previousShardRoutingTable == null || !previousShardRoutingTable.equals(currentShardRoutingTable)) {
-                        diffs.add(currentShardRoutingTable);
-                    }
-                }
-                return new RoutingTableIncrementalDiff.IndexRoutingTableIncrementalDiff(diffs);
+                return new RoutingTableIncrementalDiff.IndexRoutingTableIncrementalDiff(currentState.getIndex(), currentState, previousState);
             }
         };
 
