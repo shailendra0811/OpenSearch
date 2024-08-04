@@ -144,7 +144,7 @@ public class InternalRemoteRoutingTableService extends AbstractLifecycleComponen
         Map<String, Diff<IndexRoutingTable>> indexRoutingTableDiff,
         LatchedActionListener<ClusterMetadataManifest.UploadedMetadata> latchedActionListener
     ) {
-        RoutingTableIncrementalDiff routingTableIncrementalDiff = new RoutingTableIncrementalDiff(indexRoutingTableDiff);
+        RoutingTableIncrementalDiff routingTableIncrementalDiff = null;//new RoutingTableIncrementalDiff(indexRoutingTableDiff);
         RemoteRoutingTableDiff remoteRoutingTableDiff = new RemoteRoutingTableDiff(
             routingTableIncrementalDiff,
             clusterUUID,

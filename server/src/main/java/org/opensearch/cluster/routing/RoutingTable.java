@@ -378,6 +378,10 @@ public class RoutingTable implements Iterable<IndexRoutingTable>, Diffable<Routi
         return new RoutingTableDiff(previousState, this);
     }
 
+    public Diff<RoutingTable> incrementalDiff(RoutingTable previousState) {
+        return new RoutingTableIncrementalDiff(previousState, this);
+    }
+
     public static Diff<RoutingTable> readDiffFrom(StreamInput in) throws IOException {
         return new RoutingTableDiff(in);
     }

@@ -103,7 +103,8 @@ public class RemoteRoutingTableDiff extends AbstractRemoteWritableBlobEntity<Rou
      */
     public Map<String, Diff<IndexRoutingTable>> getDiffs() {
         assert routingTableIncrementalDiff != null;
-        return routingTableIncrementalDiff.getDiffs();
+        //return routingTableIncrementalDiff.getDiffs();
+        return null;
     }
 
     @Override

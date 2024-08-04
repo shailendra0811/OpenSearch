@@ -42,7 +42,7 @@ public class RoutingTableIncrementalDiff implements Diff<RoutingTable> {
 
             @Override
             public Diff<IndexRoutingTable> diff(IndexRoutingTable currentState, IndexRoutingTable previousState) {
-                return new RoutingTableIncrementalDiff.IndexRoutingTableIncrementalDiff(currentState.getIndex(), currentState, previousState);
+                return new RoutingTableIncrementalDiff.IndexRoutingTableIncrementalDiff(currentState.getIndex(), previousState, currentState);
             }
         };
 

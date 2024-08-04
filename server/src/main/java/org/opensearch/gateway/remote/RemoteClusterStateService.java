@@ -1294,11 +1294,11 @@ public class RemoteClusterStateService implements Closeable {
         );
         RoutingTableIncrementalDiff routingTableDiff = readIndexRoutingTableDiffResults.get();
         if (routingTableDiff != null) {
-            routingTableDiff.getDiffs().forEach((key, diff) -> {
+            /*routingTableDiff.getDiffs().forEach((key, diff) -> {
                 IndexRoutingTable previousIndexRoutingTable = indicesRouting.get(key);
                 IndexRoutingTable updatedTable = diff.apply(previousIndexRoutingTable);
                 indicesRouting.put(key, updatedTable);
-            });
+            });*/
         }
         clusterStateBuilder.routingTable(new RoutingTable(manifest.getRoutingTableVersion(), indicesRouting));
 
