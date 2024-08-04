@@ -34,7 +34,6 @@ package org.opensearch.cluster.routing;
 
 import org.opensearch.Version;
 import org.opensearch.cluster.ClusterState;
-import org.opensearch.cluster.Diff;
 import org.opensearch.cluster.OpenSearchAllocationTestCase;
 import org.opensearch.cluster.metadata.IndexMetadata;
 import org.opensearch.cluster.metadata.Metadata;
@@ -74,15 +73,15 @@ import static org.mockito.Mockito.when;
 
 public class RoutingTableTests extends OpenSearchAllocationTestCase {
 
-    protected static final String TEST_INDEX_1 = "test1";
-    protected static final String TEST_INDEX_2 = "test2";
-    protected RoutingTable emptyRoutingTable;
-    protected int numberOfShards;
-    protected int numberOfReplicas;
-    protected int shardsPerIndex;
-    protected int totalNumberOfShards;
-    protected static final Settings DEFAULT_SETTINGS = Settings.builder().put(IndexMetadata.SETTING_VERSION_CREATED, Version.CURRENT).build();
-    protected final AllocationService ALLOCATION_SERVICE = createAllocationService(
+    private static final String TEST_INDEX_1 = "test1";
+    private static final String TEST_INDEX_2 = "test2";
+    private RoutingTable emptyRoutingTable;
+    private int numberOfShards;
+    private int numberOfReplicas;
+    private int shardsPerIndex;
+    private int totalNumberOfShards;
+    private static final Settings DEFAULT_SETTINGS = Settings.builder().put(IndexMetadata.SETTING_VERSION_CREATED, Version.CURRENT).build();
+    private final AllocationService ALLOCATION_SERVICE = createAllocationService(
         Settings.builder()
             .put("cluster.routing.allocation.node_concurrent_recoveries", Integer.MAX_VALUE) // don't limit recoveries
             .put("cluster.routing.allocation.node_initial_primaries_recoveries", Integer.MAX_VALUE)
@@ -92,7 +91,7 @@ public class RoutingTableTests extends OpenSearchAllocationTestCase {
             )
             .build()
     );
-    protected ClusterState clusterState;
+    private ClusterState clusterState;
 
     @Override
     @Before
@@ -122,7 +121,7 @@ public class RoutingTableTests extends OpenSearchAllocationTestCase {
     /**
      * puts primary shard indexRoutings into initializing state
      */
-    protected void initPrimaries() {
+    private void initPrimaries() {
         logger.info("adding {} nodes and performing rerouting", this.numberOfReplicas + 1);
         Builder discoBuilder = DiscoveryNodes.builder();
         for (int i = 0; i < this.numberOfReplicas + 1; i++) {
@@ -134,7 +133,7 @@ public class RoutingTableTests extends OpenSearchAllocationTestCase {
         this.clusterState = rerouteResult;
     }
 
-    protected void startInitializingShards(String index) {
+    private void startInitializingShards(String index) {
         logger.info("start primary shards for index {}", index);
         clusterState = startInitializingShardsAndReroute(ALLOCATION_SERVICE, clusterState, index);
     }
