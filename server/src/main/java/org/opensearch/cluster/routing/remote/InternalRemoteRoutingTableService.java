@@ -98,12 +98,7 @@ public class InternalRemoteRoutingTableService extends AbstractLifecycleComponen
         RoutingTable before,
         RoutingTable after
     ) {
-        return DiffableUtils.diff(
-            before.getIndicesRouting(),
-            after.getIndicesRouting(),
-            DiffableUtils.getStringKeySerializer(),
-            CUSTOM_ROUTING_TABLE_DIFFABLE_VALUE_SERIALIZER
-        );
+        return new RoutingTableIncrementalDiff(before, after).getIndicesRouting();
     }
 
     /**

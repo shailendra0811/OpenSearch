@@ -32,29 +32,6 @@ import java.util.Map;
  */
 public interface RemoteRoutingTableService extends LifecycleComponent {
 
-    DiffableUtils.DiffableValueSerializer<String, IndexRoutingTable> CUSTOM_ROUTING_TABLE_DIFFABLE_VALUE_SERIALIZER =
-        new DiffableUtils.DiffableValueSerializer<>() {
-            @Override
-            public IndexRoutingTable read(StreamInput in, String key) throws IOException {
-                return IndexRoutingTable.readFrom(in);
-            }
-
-            @Override
-            public void write(IndexRoutingTable value, StreamOutput out) throws IOException {
-                value.writeTo(out);
-            }
-
-            @Override
-            public Diff<IndexRoutingTable> readDiff(StreamInput in, String key) throws IOException {
-                return IndexRoutingTable.readDiffFrom(in);
-            }
-
-            @Override
-            public Diff<IndexRoutingTable> diff(IndexRoutingTable currentState, IndexRoutingTable previousState) {
-                return new RoutingTableIncrementalDiff.IndexRoutingTableIncrementalDiff(currentState.getIndex(), currentState, previousState);
-            }
-        };
-
     List<IndexRoutingTable> getIndicesRouting(RoutingTable routingTable);
 
     void getAsyncIndexRoutingReadAction(

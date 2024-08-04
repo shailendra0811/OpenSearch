@@ -19,6 +19,7 @@ import org.opensearch.cluster.metadata.TemplatesMetadata;
 import org.opensearch.cluster.node.DiscoveryNode;
 import org.opensearch.cluster.node.DiscoveryNodes;
 import org.opensearch.cluster.routing.IndexRoutingTable;
+import org.opensearch.cluster.routing.RoutingTableIncrementalDiff;
 import org.opensearch.common.settings.Settings;
 import org.opensearch.common.xcontent.json.JsonXContent;
 import org.opensearch.core.common.bytes.BytesReference;
@@ -42,7 +43,6 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.opensearch.Version.CURRENT;
 import static org.opensearch.cluster.ClusterState.EMPTY_STATE;
-import static org.opensearch.cluster.routing.remote.RemoteRoutingTableService.CUSTOM_ROUTING_TABLE_DIFFABLE_VALUE_SERIALIZER;
 import static org.opensearch.core.common.transport.TransportAddress.META_ADDRESS;
 import static org.opensearch.gateway.remote.ClusterMetadataManifest.CODEC_V3;
 import static org.opensearch.gateway.remote.RemoteClusterStateServiceTests.generateClusterStateWithOneIndex;
@@ -163,15 +163,9 @@ public class ClusterStateDiffManifestTests extends OpenSearchTestCase {
 
     private ClusterStateDiffManifest verifyRoutingTableDiffManifest(ClusterState previousState, ClusterState currentState) {
         // Create initial and updated IndexRoutingTable maps
-        Map<String, IndexRoutingTable> initialRoutingTableMap = previousState.getRoutingTable().indicesRouting();
-        Map<String, IndexRoutingTable> updatedRoutingTableMap = currentState.getRoutingTable().indicesRouting();
-
-        DiffableUtils.MapDiff<String, IndexRoutingTable, Map<String, IndexRoutingTable>> routingTableIncrementalDiff = DiffableUtils.diff(
-            initialRoutingTableMap,
-            updatedRoutingTableMap,
-            DiffableUtils.getStringKeySerializer(),
-            CUSTOM_ROUTING_TABLE_DIFFABLE_VALUE_SERIALIZER
-        );
+        DiffableUtils.MapDiff<String, IndexRoutingTable, Map<String, IndexRoutingTable>> routingTableIncrementalDiff = new RoutingTableIncrementalDiff(
+            previousState.getRoutingTable(),
+            currentState.getRoutingTable()).getIndicesRouting();
         ClusterStateDiffManifest manifest = new ClusterStateDiffManifest(
             currentState,
             previousState,

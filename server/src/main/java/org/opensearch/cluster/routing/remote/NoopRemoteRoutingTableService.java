@@ -36,12 +36,7 @@ public class NoopRemoteRoutingTableService extends AbstractLifecycleComponent im
         RoutingTable before,
         RoutingTable after
     ) {
-        return DiffableUtils.diff(
-            Map.of(),
-            Map.of(),
-            DiffableUtils.getStringKeySerializer(),
-            CUSTOM_ROUTING_TABLE_DIFFABLE_VALUE_SERIALIZER
-        );
+        return new RoutingTableIncrementalDiff(before, after).getIndicesRouting();
     }
 
     @Override
