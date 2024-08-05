@@ -345,7 +345,6 @@ public class RemoteClusterStateService implements Closeable {
         final DiffableUtils.MapDiff<String, IndexRoutingTable, Map<String, IndexRoutingTable>> routingTableIncrementalDiff =
             remoteRoutingTableService.getIndicesRoutingMapDiff(previousClusterState.getRoutingTable(), clusterState.getRoutingTable());
 
-        Map<String, Diff<IndexRoutingTable>> indexRoutingTableDiffs = routingTableIncrementalDiff.getDiffs();
         routingTableIncrementalDiff.getDiffs().forEach((k, v) -> indicesRoutingToUpload.add(clusterState.getRoutingTable().index(k)));
         routingTableIncrementalDiff.getUpserts().forEach((k, v) -> indicesRoutingToUpload.add(v));
 
@@ -1020,7 +1019,7 @@ public class RemoteClusterStateService implements Closeable {
         Map<String, UploadedMetadataAttribute> clusterStateCustomToRead,
         boolean readIndexRoutingTableDiff,
         boolean includeEphemeral
-    ) throws IOException {
+    ) {
         int totalReadTasks = indicesToRead.size() + customToRead.size() + (readCoordinationMetadata ? 1 : 0) + (readSettingsMetadata
             ? 1
             : 0) + (readTemplatesMetadata ? 1 : 0) + (readDiscoveryNodes ? 1 : 0) + (readClusterBlocks ? 1 : 0)
@@ -1295,11 +1294,7 @@ public class RemoteClusterStateService implements Closeable {
         );
         RoutingTableIncrementalDiff routingTableDiff = readIndexRoutingTableDiffResults.get();
         if (routingTableDiff != null) {
-            routingTableDiff.getIndicesRouting().getDiffs().forEach((key, diff) -> {
-                IndexRoutingTable previousIndexRoutingTable = indicesRouting.get(key);
-                IndexRoutingTable updatedTable = diff.apply(previousIndexRoutingTable);
-                indicesRouting.put(key, updatedTable);
-            });
+            routingTableDiff.apply(previousState.getRoutingTable());
         }
         clusterStateBuilder.routingTable(new RoutingTable(manifest.getRoutingTableVersion(), indicesRouting));
 
@@ -1360,8 +1355,7 @@ public class RemoteClusterStateService implements Closeable {
 
     }
 
-    public ClusterState getClusterStateUsingDiff(ClusterMetadataManifest manifest, ClusterState previousState, String localNodeId)
-        throws IOException {
+    public ClusterState getClusterStateUsingDiff(ClusterMetadataManifest manifest, ClusterState previousState, String localNodeId) {
         assert manifest.getDiffManifest() != null : "Diff manifest null which is required for downloading cluster state";
         ClusterStateDiffManifest diff = manifest.getDiffManifest();
         List<UploadedIndexMetadata> updatedIndices = diff.getIndicesUpdated().stream().map(idx -> {
