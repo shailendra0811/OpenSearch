@@ -11,6 +11,7 @@ package org.opensearch.gateway.remote.routingtable;
 import org.opensearch.cluster.Diff;
 import org.opensearch.cluster.routing.IndexRoutingTable;
 import org.opensearch.cluster.routing.RoutingTable;
+import org.opensearch.cluster.routing.RoutingTableIncrementalDiff;
 import org.opensearch.common.io.Streams;
 import org.opensearch.common.remote.AbstractRemoteWritableBlobEntity;
 import org.opensearch.common.remote.BlobPathParameters;
@@ -31,9 +32,7 @@ import static org.opensearch.gateway.remote.RemoteClusterStateUtils.DELIMITER;
  */
 public class RemoteRoutingTableDiff extends AbstractRemoteWritableBlobEntity<Diff<RoutingTable>> {
 
-    private final Diff<RoutingTable> routingTableDiff;
-
-    private final ChecksumWritableBlobStoreFormat<Diff<RoutingTable>> writeableBlobFormat;
+    private final RoutingTableIncrementalDiff routingTableIncrementalDiff;
 
     private long term;
     private long version;
@@ -43,32 +42,46 @@ public class RemoteRoutingTableDiff extends AbstractRemoteWritableBlobEntity<Dif
     public static final String ROUTING_TABLE_DIFF_METADATA_PREFIX = "routingTableDiff--";
 
     public static final String ROUTING_TABLE_DIFF_FILE = "routing_table_diff";
+    private static final String codec = "RemoteRoutingTableDiff";
     public static final String ROUTING_TABLE_DIFF_PATH_TOKEN = "routing-table-diff";
 
     public static final int VERSION = 1;
 
+    public static final ChecksumWritableBlobStoreFormat<RoutingTableIncrementalDiff> REMOTE_ROUTING_TABLE_DIFF_FORMAT =
+        new ChecksumWritableBlobStoreFormat<>(codec, RoutingTableIncrementalDiff::readFrom);
+
     /**
      * Constructs a new RemoteRoutingTableDiff with the given differences.
      *
-     * @param routingTableDiff a {@link Diff<RoutingTable>} object containing the differences of {@link IndexRoutingTable}.
+     * @param routingTableIncrementalDiff a RoutingTableIncrementalDiff object containing the differences of {@link IndexRoutingTable}.
      * @param clusterUUID the cluster UUID.
      * @param compressor the compressor to be used.
      * @param term the term of the routing table.
      * @param version the version of the routing table.
      */
     public RemoteRoutingTableDiff(
-        Diff<RoutingTable> routingTableDiff,
+        RoutingTableIncrementalDiff routingTableIncrementalDiff,
         String clusterUUID,
         Compressor compressor,
         long term,
-        long version,
-        ChecksumWritableBlobStoreFormat<Diff<RoutingTable>> writeableBlobFormat
+        long version
     ) {
         super(clusterUUID, compressor);
-        this.routingTableDiff = routingTableDiff;
+        this.routingTableIncrementalDiff = routingTableIncrementalDiff;
         this.term = term;
         this.version = version;
-        this.writeableBlobFormat = writeableBlobFormat;
+    }
+
+    /**
+     * Constructs a new RemoteRoutingTableDiff with the given differences.
+     *
+     * @param routingTableIncrementalDiff a RoutingTableIncrementalDiff object containing the differences of {@link IndexRoutingTable}.
+     * @param clusterUUID the cluster UUID.
+     * @param compressor the compressor to be used.
+     */
+    public RemoteRoutingTableDiff(RoutingTableIncrementalDiff routingTableIncrementalDiff, String clusterUUID, Compressor compressor) {
+        super(clusterUUID, compressor);
+        this.routingTableIncrementalDiff = routingTableIncrementalDiff;
     }
 
     /**
@@ -80,8 +93,7 @@ public class RemoteRoutingTableDiff extends AbstractRemoteWritableBlobEntity<Dif
      */
     public RemoteRoutingTableDiff(String blobName, String clusterUUID, Compressor compressor) {
         super(clusterUUID, compressor);
-        this.routingTableDiff = null;
-        this.writeableBlobFormat = null;
+        this.routingTableIncrementalDiff = null;
         this.blobName = blobName;
     }
 
@@ -91,7 +103,7 @@ public class RemoteRoutingTableDiff extends AbstractRemoteWritableBlobEntity<Dif
      * @return a map containing the differences.
      */
     public Diff<RoutingTable> getDiffs() {
-        return routingTableDiff;
+        return routingTableIncrementalDiff;
     }
 
     @Override
@@ -126,13 +138,13 @@ public class RemoteRoutingTableDiff extends AbstractRemoteWritableBlobEntity<Dif
 
     @Override
     public InputStream serialize() throws IOException {
-        assert routingTableDiff != null;
-        return writeableBlobFormat.serialize(routingTableDiff, generateBlobFileName(), getCompressor())
+        assert routingTableIncrementalDiff != null;
+        return REMOTE_ROUTING_TABLE_DIFF_FORMAT.serialize(routingTableIncrementalDiff, generateBlobFileName(), getCompressor())
             .streamInput();
     }
 
     @Override
     public Diff<RoutingTable> deserialize(InputStream in) throws IOException {
-        return writeableBlobFormat.deserialize(blobName, Streams.readFully(in));
+        return REMOTE_ROUTING_TABLE_DIFF_FORMAT.deserialize(blobName, Streams.readFully(in));
     }
 }

@@ -38,7 +38,6 @@ import org.opensearch.node.remotestore.RemoteStoreNodeAttribute;
 import org.opensearch.repositories.RepositoriesService;
 import org.opensearch.repositories.Repository;
 import org.opensearch.repositories.blobstore.BlobStoreRepository;
-import org.opensearch.repositories.blobstore.ChecksumWritableBlobStoreFormat;
 import org.opensearch.threadpool.ThreadPool;
 
 import java.io.IOException;
@@ -69,9 +68,7 @@ public class InternalRemoteRoutingTableService extends AbstractLifecycleComponen
     private BlobStoreRepository blobStoreRepository;
     private final ThreadPool threadPool;
     private final String clusterName;
-
-    private static final String CODEC = "RemoteRoutingTableDiff";
-
+    
     public InternalRemoteRoutingTableService(
         Supplier<RepositoriesService> repositoriesService,
         Settings settings,
@@ -151,8 +148,7 @@ public class InternalRemoteRoutingTableService extends AbstractLifecycleComponen
                 clusterUUID,
                 compressor,
                 term,
-                version,
-            new ChecksumWritableBlobStoreFormat<>(CODEC, RoutingTableIncrementalDiff::readFrom)
+                version
         );
         ActionListener<Void> completionListener = ActionListener.wrap(
                 resp -> latchedActionListener.onResponse(remoteRoutingTableDiff.getUploadedMetadata()),
