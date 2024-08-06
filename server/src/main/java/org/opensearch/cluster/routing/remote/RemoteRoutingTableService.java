@@ -12,16 +12,13 @@ import org.opensearch.action.LatchedActionListener;
 import org.opensearch.cluster.Diff;
 import org.opensearch.cluster.DiffableUtils;
 import org.opensearch.cluster.routing.IndexRoutingTable;
-import org.opensearch.cluster.routing.IndexShardRoutingTable;
 import org.opensearch.cluster.routing.RoutingTable;
-import org.opensearch.cluster.routing.RoutingTableIncrementalDiff;
+import org.opensearch.cluster.routing.StringKeyDiffProvider;
 import org.opensearch.common.lifecycle.LifecycleComponent;
-import org.opensearch.core.common.io.stream.StreamInput;
-import org.opensearch.core.common.io.stream.StreamOutput;
+
 import org.opensearch.gateway.remote.ClusterMetadataManifest;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -43,7 +40,7 @@ public interface RemoteRoutingTableService extends LifecycleComponent {
     void getAsyncIndexRoutingTableDiffReadAction(
         String clusterUUID,
         String uploadedFilename,
-        LatchedActionListener<RoutingTableIncrementalDiff> latchedActionListener
+        LatchedActionListener<Diff<RoutingTable>> latchedActionListener
     );
 
     List<ClusterMetadataManifest.UploadedIndexMetadata> getUpdatedIndexRoutingTableMetadata(
@@ -51,7 +48,7 @@ public interface RemoteRoutingTableService extends LifecycleComponent {
         List<ClusterMetadataManifest.UploadedIndexMetadata> allIndicesRouting
     );
 
-    DiffableUtils.MapDiff<String, IndexRoutingTable, Map<String, IndexRoutingTable>> getIndicesRoutingMapDiff(
+    StringKeyDiffProvider<IndexRoutingTable> getIndicesRoutingMapDiff(
         RoutingTable before,
         RoutingTable after
     );

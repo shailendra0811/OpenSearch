@@ -20,6 +20,7 @@ import org.opensearch.cluster.node.DiscoveryNode;
 import org.opensearch.cluster.node.DiscoveryNodes;
 import org.opensearch.cluster.routing.IndexRoutingTable;
 import org.opensearch.cluster.routing.RoutingTableIncrementalDiff;
+import org.opensearch.cluster.routing.StringKeyDiffProvider;
 import org.opensearch.common.settings.Settings;
 import org.opensearch.common.xcontent.json.JsonXContent;
 import org.opensearch.core.common.bytes.BytesReference;
@@ -163,18 +164,18 @@ public class ClusterStateDiffManifestTests extends OpenSearchTestCase {
 
     private ClusterStateDiffManifest verifyRoutingTableDiffManifest(ClusterState previousState, ClusterState currentState) {
         // Create initial and updated IndexRoutingTable maps
-        DiffableUtils.MapDiff<String, IndexRoutingTable, Map<String, IndexRoutingTable>> routingTableIncrementalDiff = new RoutingTableIncrementalDiff(
+        StringKeyDiffProvider<IndexRoutingTable> routingTableDiff = new RoutingTableIncrementalDiff(
             previousState.getRoutingTable(),
-            currentState.getRoutingTable()).getIndicesRouting();
+            currentState.getRoutingTable());
         ClusterStateDiffManifest manifest = new ClusterStateDiffManifest(
             currentState,
             previousState,
-            routingTableIncrementalDiff,
+            routingTableDiff,
             "indicesRoutingDiffPath"
         );
         assertEquals("indicesRoutingDiffPath", manifest.getIndicesRoutingDiffPath());
-        assertEquals(routingTableIncrementalDiff.getUpserts().size(), manifest.getIndicesRoutingUpdated().size());
-        assertEquals(routingTableIncrementalDiff.getDeletes().size(), manifest.getIndicesRoutingDeleted().size());
+        assertEquals(routingTableDiff.provideDiff().getUpserts().size(), manifest.getIndicesRoutingUpdated().size());
+        assertEquals(routingTableDiff.provideDiff().getDeletes().size(), manifest.getIndicesRoutingDeleted().size());
         return manifest;
     }
 

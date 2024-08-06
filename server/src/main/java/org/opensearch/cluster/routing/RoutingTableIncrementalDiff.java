@@ -15,16 +15,16 @@ import org.opensearch.core.common.io.stream.StreamOutput;
 import org.opensearch.core.index.Index;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+
+import static org.opensearch.cluster.DiffableUtils.MapDiff;
 
 /**
  * Represents a difference between {@link RoutingTable} objects that can be serialized and deserialized.
  */
-public class RoutingTableIncrementalDiff implements Diff<RoutingTable> {
+public class RoutingTableIncrementalDiff implements Diff<RoutingTable>, StringKeyDiffProvider<IndexRoutingTable> {
 
-    private DiffableUtils.MapDiff<String, IndexRoutingTable, Map<String, IndexRoutingTable>> indicesRouting;
+    private final Diff<Map<String, IndexRoutingTable>> indicesRouting;
 
     private final long version;
 
@@ -77,8 +77,9 @@ public class RoutingTableIncrementalDiff implements Diff<RoutingTable> {
         indicesRouting.writeTo(out);
     }
 
-    public DiffableUtils.MapDiff<String, IndexRoutingTable, Map<String, IndexRoutingTable>> getIndicesRouting() {
-        return indicesRouting;
+    @Override
+    public MapDiff<String, IndexRoutingTable, Map<String, IndexRoutingTable>> provideDiff() {
+        return (MapDiff<String, IndexRoutingTable, Map<String, IndexRoutingTable>>) indicesRouting;
     }
 
     /**

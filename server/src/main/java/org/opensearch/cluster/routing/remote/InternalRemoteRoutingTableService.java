@@ -17,6 +17,7 @@ import org.opensearch.cluster.DiffableUtils;
 import org.opensearch.cluster.routing.IndexRoutingTable;
 import org.opensearch.cluster.routing.RoutingTable;
 import org.opensearch.cluster.routing.RoutingTableIncrementalDiff;
+import org.opensearch.cluster.routing.StringKeyDiffProvider;
 import org.opensearch.common.blobstore.BlobPath;
 import org.opensearch.common.lifecycle.AbstractLifecycleComponent;
 import org.opensearch.common.remote.RemoteWritableEntityStore;
@@ -37,6 +38,7 @@ import org.opensearch.node.remotestore.RemoteStoreNodeAttribute;
 import org.opensearch.repositories.RepositoriesService;
 import org.opensearch.repositories.Repository;
 import org.opensearch.repositories.blobstore.BlobStoreRepository;
+import org.opensearch.repositories.blobstore.ChecksumWritableBlobStoreFormat;
 import org.opensearch.threadpool.ThreadPool;
 
 import java.io.IOException;
@@ -62,11 +64,13 @@ public class InternalRemoteRoutingTableService extends AbstractLifecycleComponen
     private final Supplier<RepositoriesService> repositoriesService;
     private Compressor compressor;
     private RemoteWritableEntityStore<IndexRoutingTable, RemoteIndexRoutingTable> remoteIndexRoutingTableStore;
-    private RemoteWritableEntityStore<RoutingTableIncrementalDiff, RemoteRoutingTableDiff> remoteRoutingTableDiffStore;
+    private RemoteWritableEntityStore<Diff<RoutingTable>, RemoteRoutingTableDiff> remoteRoutingTableDiffStore;
     private final ClusterSettings clusterSettings;
     private BlobStoreRepository blobStoreRepository;
     private final ThreadPool threadPool;
     private final String clusterName;
+
+    private static final String CODEC = "RemoteRoutingTableDiff";
 
     public InternalRemoteRoutingTableService(
         Supplier<RepositoriesService> repositoriesService,
@@ -94,11 +98,12 @@ public class InternalRemoteRoutingTableService extends AbstractLifecycleComponen
      * @param after  current routing table
      * @return incremental diff of the previous and current routing table
      */
-    public DiffableUtils.MapDiff<String, IndexRoutingTable, Map<String, IndexRoutingTable>> getIndicesRoutingMapDiff(
+    @Override
+    public StringKeyDiffProvider<IndexRoutingTable> getIndicesRoutingMapDiff(
         RoutingTable before,
         RoutingTable after
     ) {
-        return new RoutingTableIncrementalDiff(before, after).getIndicesRouting();
+        return new RoutingTableIncrementalDiff(before, after);
     }
 
     /**
@@ -146,7 +151,8 @@ public class InternalRemoteRoutingTableService extends AbstractLifecycleComponen
                 clusterUUID,
                 compressor,
                 term,
-                version
+                version,
+            new ChecksumWritableBlobStoreFormat<>(CODEC, RoutingTableIncrementalDiff::readFrom)
         );
         ActionListener<Void> completionListener = ActionListener.wrap(
                 resp -> latchedActionListener.onResponse(remoteRoutingTableDiff.getUploadedMetadata()),
@@ -203,15 +209,14 @@ public class InternalRemoteRoutingTableService extends AbstractLifecycleComponen
     public void getAsyncIndexRoutingTableDiffReadAction(
         String clusterUUID,
         String uploadedFilename,
-        LatchedActionListener<RoutingTableIncrementalDiff> latchedActionListener
+        LatchedActionListener<Diff<RoutingTable>> latchedActionListener
     ) {
-        ActionListener<RoutingTableIncrementalDiff> actionListener = ActionListener.wrap(
+        ActionListener<Diff<RoutingTable>> actionListener = ActionListener.wrap(
             latchedActionListener::onResponse,
             latchedActionListener::onFailure
         );
 
         RemoteRoutingTableDiff remoteRoutingTableDiff = new RemoteRoutingTableDiff(uploadedFilename, clusterUUID, compressor);
-
         remoteRoutingTableDiffStore.readAsync(remoteRoutingTableDiff, actionListener);
     }
 
