@@ -14,7 +14,6 @@ import org.opensearch.action.LatchedActionListener;
 import org.opensearch.cluster.ClusterName;
 import org.opensearch.cluster.ClusterState;
 import org.opensearch.cluster.Diff;
-import org.opensearch.cluster.DiffableUtils;
 import org.opensearch.cluster.coordination.CoordinationMetadata;
 import org.opensearch.cluster.metadata.IndexMetadata;
 import org.opensearch.cluster.metadata.Metadata;
@@ -649,8 +648,6 @@ public class RemoteRoutingTableServiceTests extends OpenSearchTestCase {
         String indexName = randomAlphaOfLength(randomIntBetween(1, 50));
         ClusterState previousState = generateClusterStateWithOneIndex(indexName, 5, 1, false).build();
         ClusterState currentState = generateClusterStateWithOneIndex(indexName, 5, 2, true).build();
-
-        //RoutingTableIncrementalDiff diff = new RoutingTableIncrementalDiff(previousState.getRoutingTable(), currentState.getRoutingTable());
 
         Iterable<String> remotePath = new BlobPath().add("base-path")
             .add(
