@@ -68,7 +68,7 @@ public class InternalRemoteRoutingTableService extends AbstractLifecycleComponen
     private BlobStoreRepository blobStoreRepository;
     private final ThreadPool threadPool;
     private final String clusterName;
-    
+
     public InternalRemoteRoutingTableService(
         Supplier<RepositoriesService> repositoriesService,
         Settings settings,
