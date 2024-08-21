@@ -43,7 +43,11 @@ public class RoutingTableIncrementalDiff implements Diff<RoutingTable>, StringKe
 
             @Override
             public Diff<IndexRoutingTable> diff(IndexRoutingTable currentState, IndexRoutingTable previousState) {
-                return new RoutingTableIncrementalDiff.IndexRoutingTableIncrementalDiff(currentState.getIndex(), previousState, currentState);
+                return new RoutingTableIncrementalDiff.IndexRoutingTableIncrementalDiff(
+                    currentState.getIndex(),
+                    previousState,
+                    currentState
+                );
             }
         };
 
@@ -59,7 +63,11 @@ public class RoutingTableIncrementalDiff implements Diff<RoutingTable>, StringKe
 
     public RoutingTableIncrementalDiff(StreamInput in) throws IOException {
         version = in.readLong();
-        indicesRouting = DiffableUtils.readJdkMapDiff(in, DiffableUtils.getStringKeySerializer(), CUSTOM_ROUTING_TABLE_DIFFABLE_VALUE_SERIALIZER);
+        indicesRouting = DiffableUtils.readJdkMapDiff(
+            in,
+            DiffableUtils.getStringKeySerializer(),
+            CUSTOM_ROUTING_TABLE_DIFFABLE_VALUE_SERIALIZER
+        );
     }
 
     public static RoutingTableIncrementalDiff readFrom(StreamInput in) throws IOException {
@@ -87,7 +95,7 @@ public class RoutingTableIncrementalDiff implements Diff<RoutingTable>, StringKe
      */
     public static class IndexRoutingTableIncrementalDiff implements Diff<IndexRoutingTable> {
 
-        private final Diff<Map<Integer, IndexShardRoutingTable>> indexShardRoutingTables ;
+        private final Diff<Map<Integer, IndexShardRoutingTable>> indexShardRoutingTables;
 
         private final Index index;
 
@@ -98,7 +106,6 @@ public class RoutingTableIncrementalDiff implements Diff<RoutingTable>, StringKe
 
         private static final DiffableUtils.DiffableValueReader<Integer, IndexShardRoutingTable> DIFF_VALUE_READER =
             new DiffableUtils.DiffableValueReader<>(IndexShardRoutingTable::readFrom, IndexShardRoutingTable::readDiffFrom);
-
 
         public IndexRoutingTableIncrementalDiff(StreamInput in) throws IOException {
             this.index = new Index(in);

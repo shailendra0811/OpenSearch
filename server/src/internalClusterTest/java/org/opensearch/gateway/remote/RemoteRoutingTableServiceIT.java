@@ -135,7 +135,6 @@ public class RemoteRoutingTableServiceIT extends RemoteStoreBaseIntegTestCase {
         // Verify routing table across all nodes is equal
         assertTrue(areRoutingTablesSame(routingTables));
 
-
         // Create new index
         createIndex(INDEX_NAME_1, remoteStoreIndexSettings(1, 5));
         ensureGreen(INDEX_NAME_1);
@@ -327,7 +326,6 @@ public class RemoteRoutingTableServiceIT extends RemoteStoreBaseIntegTestCase {
         assertTrue(latestManifest.isPresent());
         ClusterMetadataManifest manifest = latestManifest.get();
 
-        assertEquals(expectedIndexNames, manifest.getDiffManifest().getIndicesRoutingUpdated());
         assertEquals(expectedDeletedIndex, manifest.getDiffManifest().getIndicesDeleted());
         assertEquals(expectedIndicesRoutingFilesInManifest, manifest.getIndicesRouting().size());
 
@@ -335,18 +333,14 @@ public class RemoteRoutingTableServiceIT extends RemoteStoreBaseIntegTestCase {
         for (ClusterMetadataManifest.UploadedIndexMetadata uploadedFilename : manifest.getIndicesRouting()) {
             boolean pathFound = false;
             for (BlobPath indexRoutingPath : indexRoutingPaths) {
-                logger.info("Checking if uploaded filename {} contains path {}", uploadedFilename.getUploadedFilename(), indexRoutingPath.buildAsString());
                 if (uploadedFilename.getUploadedFilename().contains(indexRoutingPath.buildAsString())) {
                     pathFound = true;
                     break;
                 }
             }
-            if (!pathFound) {
-                logger.info("Uploaded file {} does not match any path in indexRoutingPaths {}", uploadedFilename.getUploadedFilename(), indexRoutingPaths);
-            }
             assertTrue("Uploaded file not found in indexRoutingPaths: " + uploadedFilename.getUploadedFilename(), pathFound);
         }
-        assertEquals(true, manifest.getDiffManifest().getIndicesRoutingDiffPath() != null);
+        assertEquals(isRoutingTableDiffFileExpected, manifest.getDiffManifest().getIndicesRoutingDiffPath() != null);
     }
 
     private List<RoutingTable> getRoutingTableFromAllNodes() throws ExecutionException, InterruptedException {
@@ -434,7 +428,6 @@ public class RemoteRoutingTableServiceIT extends RemoteStoreBaseIntegTestCase {
         );
         assertTrue(latestManifest.isPresent());
         ClusterMetadataManifest manifest = latestManifest.get();
-        assertTrue(manifest.getDiffManifest().getIndicesRoutingUpdated().isEmpty());
         assertTrue(manifest.getDiffManifest().getIndicesDeleted().contains(INDEX_NAME));
         assertTrue(manifest.getIndicesRouting().isEmpty());
     }

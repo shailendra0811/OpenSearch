@@ -10,7 +10,6 @@ package org.opensearch.gateway.remote.model;
 
 import org.opensearch.Version;
 import org.opensearch.cluster.ClusterState;
-import org.opensearch.cluster.DiffableUtils;
 import org.opensearch.cluster.coordination.CoordinationMetadata;
 import org.opensearch.cluster.metadata.IndexMetadata;
 import org.opensearch.cluster.metadata.IndexTemplateMetadata;
@@ -166,16 +165,10 @@ public class ClusterStateDiffManifestTests extends OpenSearchTestCase {
         // Create initial and updated IndexRoutingTable maps
         StringKeyDiffProvider<IndexRoutingTable> routingTableDiff = new RoutingTableIncrementalDiff(
             previousState.getRoutingTable(),
-            currentState.getRoutingTable());
-        ClusterStateDiffManifest manifest = new ClusterStateDiffManifest(
-            currentState,
-            previousState,
-            routingTableDiff,
-            "indicesRoutingDiffPath"
+            currentState.getRoutingTable()
         );
+        ClusterStateDiffManifest manifest = new ClusterStateDiffManifest(currentState, previousState, "indicesRoutingDiffPath");
         assertEquals("indicesRoutingDiffPath", manifest.getIndicesRoutingDiffPath());
-        assertEquals(routingTableDiff.provideDiff().getUpserts().size(), manifest.getIndicesRoutingUpdated().size());
-        assertEquals(routingTableDiff.provideDiff().getDeletes().size(), manifest.getIndicesRoutingDeleted().size());
         return manifest;
     }
 
@@ -251,7 +244,7 @@ public class ClusterStateDiffManifestTests extends OpenSearchTestCase {
         }
         ClusterState updatedClusterState = clusterStateBuilder.metadata(metadataBuilder.build()).build();
 
-        ClusterStateDiffManifest manifest = new ClusterStateDiffManifest(updatedClusterState, initialState, null, null);
+        ClusterStateDiffManifest manifest = new ClusterStateDiffManifest(updatedClusterState, initialState, null);
         assertEquals(indicesToAdd.stream().map(im -> im.getIndex().getName()).collect(toList()), manifest.getIndicesUpdated());
         assertEquals(indicesToRemove, manifest.getIndicesDeleted());
         assertEquals(new ArrayList<>(customsToAdd.keySet()), manifest.getCustomMetadataUpdated());

@@ -6,7 +6,6 @@
  * compatible open source license.
  */
 
-
 package org.opensearch.gateway.remote.routingtable;
 
 import org.opensearch.cluster.ClusterState;
@@ -87,7 +86,10 @@ public class RemoteIndexRoutingTableDiffTests extends OpenSearchTestCase {
         ClusterState previousState = generateClusterStateWithOneIndex(indexName, 5, 1, false).build();
         ClusterState currentState = generateClusterStateWithOneIndex(indexName, 5, 2, true).build();
 
-        RoutingTableIncrementalDiff routingTableIncrementalDiff = new RoutingTableIncrementalDiff(previousState.getRoutingTable(), currentState.getRoutingTable());
+        RoutingTableIncrementalDiff routingTableIncrementalDiff = new RoutingTableIncrementalDiff(
+            previousState.getRoutingTable(),
+            currentState.getRoutingTable()
+        );
 
         RemoteRoutingTableDiff remoteDiffForUpload = new RemoteRoutingTableDiff(
             routingTableIncrementalDiff,
@@ -107,7 +109,10 @@ public class RemoteIndexRoutingTableDiffTests extends OpenSearchTestCase {
         ClusterState previousState = generateClusterStateWithOneIndex(indexName, 5, 1, false).build();
         ClusterState currentState = generateClusterStateWithOneIndex(indexName, 5, 2, true).build();
 
-        RoutingTableIncrementalDiff routingTableIncrementalDiff = new RoutingTableIncrementalDiff(previousState.getRoutingTable(), currentState.getRoutingTable());
+        RoutingTableIncrementalDiff routingTableIncrementalDiff = new RoutingTableIncrementalDiff(
+            previousState.getRoutingTable(),
+            currentState.getRoutingTable()
+        );
 
         RemoteRoutingTableDiff remoteDiffForUpload = new RemoteRoutingTableDiff(
             routingTableIncrementalDiff,
@@ -127,7 +132,10 @@ public class RemoteIndexRoutingTableDiffTests extends OpenSearchTestCase {
         ClusterState previousState = generateClusterStateWithOneIndex(indexName, 5, 1, false).build();
         ClusterState currentState = generateClusterStateWithOneIndex(indexName, 5, 2, true).build();
 
-        RoutingTableIncrementalDiff routingTableIncrementalDiff = new RoutingTableIncrementalDiff(previousState.getRoutingTable(), currentState.getRoutingTable());
+        RoutingTableIncrementalDiff routingTableIncrementalDiff = new RoutingTableIncrementalDiff(
+            previousState.getRoutingTable(),
+            currentState.getRoutingTable()
+        );
 
         RemoteRoutingTableDiff remoteDiffForUpload = new RemoteRoutingTableDiff(
             routingTableIncrementalDiff,
@@ -147,7 +155,10 @@ public class RemoteIndexRoutingTableDiffTests extends OpenSearchTestCase {
         ClusterState previousState = generateClusterStateWithOneIndex(indexName, 5, 1, false).build();
         ClusterState currentState = generateClusterStateWithOneIndex(indexName, 5, 2, true).build();
 
-        RoutingTableIncrementalDiff routingTableIncrementalDiff = new RoutingTableIncrementalDiff(previousState.getRoutingTable(), currentState.getRoutingTable());
+        RoutingTableIncrementalDiff routingTableIncrementalDiff = new RoutingTableIncrementalDiff(
+            previousState.getRoutingTable(),
+            currentState.getRoutingTable()
+        );
 
         RemoteRoutingTableDiff remoteDiffForUpload = new RemoteRoutingTableDiff(
             routingTableIncrementalDiff,
@@ -169,7 +180,10 @@ public class RemoteIndexRoutingTableDiffTests extends OpenSearchTestCase {
         ClusterState previousState = generateClusterStateWithOneIndex(indexName, 5, 1, false).build();
         ClusterState currentState = generateClusterStateWithOneIndex(indexName, 5, 2, true).build();
 
-        RoutingTableIncrementalDiff routingTableIncrementalDiff = new RoutingTableIncrementalDiff(previousState.getRoutingTable(), currentState.getRoutingTable());
+        RoutingTableIncrementalDiff routingTableIncrementalDiff = new RoutingTableIncrementalDiff(
+            previousState.getRoutingTable(),
+            currentState.getRoutingTable()
+        );
 
         RemoteRoutingTableDiff remoteDiffForUpload = new RemoteRoutingTableDiff(
             routingTableIncrementalDiff,
@@ -192,7 +206,10 @@ public class RemoteIndexRoutingTableDiffTests extends OpenSearchTestCase {
         ClusterState previousState = generateClusterStateWithOneIndex(indexName, 5, 1, false).build();
         ClusterState currentState = generateClusterStateWithOneIndex(indexName, 5, 2, true).build();
 
-        RoutingTableIncrementalDiff routingTableIncrementalDiff = new RoutingTableIncrementalDiff(previousState.getRoutingTable(), currentState.getRoutingTable());
+        RoutingTableIncrementalDiff routingTableIncrementalDiff = new RoutingTableIncrementalDiff(
+            previousState.getRoutingTable(),
+            currentState.getRoutingTable()
+        );
 
         RemoteRoutingTableDiff remoteDiffForUpload = new RemoteRoutingTableDiff(
             routingTableIncrementalDiff,
@@ -215,7 +232,10 @@ public class RemoteIndexRoutingTableDiffTests extends OpenSearchTestCase {
         ClusterState previousState = generateClusterStateWithOneIndex(indexName, numberOfShards, numberOfReplicas, false).build();
         ClusterState currentState = generateClusterStateWithOneIndex(indexName, numberOfShards, numberOfReplicas + 1, true).build();
 
-        RoutingTableIncrementalDiff routingTableIncrementalDiff = new RoutingTableIncrementalDiff(previousState.getRoutingTable(), currentState.getRoutingTable());
+        RoutingTableIncrementalDiff routingTableIncrementalDiff = new RoutingTableIncrementalDiff(
+            previousState.getRoutingTable(),
+            currentState.getRoutingTable()
+        );
 
         RemoteRoutingTableDiff remoteDiffForUpload = new RemoteRoutingTableDiff(
             routingTableIncrementalDiff,
@@ -235,6 +255,9 @@ public class RemoteIndexRoutingTableDiffTests extends OpenSearchTestCase {
         Diff<RoutingTable> deserializedDiff = remoteDiffForDownload.deserialize(inputStream);
 
         // Assert that the indices routing table created from routingTableIncrementalDiff and deserializedDiff is equal
-        assertEquals(routingTableIncrementalDiff.apply(previousState.getRoutingTable()).getIndicesRouting(), deserializedDiff.apply(previousState.getRoutingTable()).getIndicesRouting());
+        assertEquals(
+            routingTableIncrementalDiff.apply(previousState.getRoutingTable()).getIndicesRouting(),
+            deserializedDiff.apply(previousState.getRoutingTable()).getIndicesRouting()
+        );
     }
 }

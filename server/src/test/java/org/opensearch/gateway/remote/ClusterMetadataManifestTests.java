@@ -10,7 +10,6 @@ package org.opensearch.gateway.remote;
 
 import org.opensearch.Version;
 import org.opensearch.cluster.ClusterState;
-import org.opensearch.cluster.DiffableUtils;
 import org.opensearch.cluster.metadata.IndexGraveyard;
 import org.opensearch.cluster.metadata.RepositoriesMetadata;
 import org.opensearch.cluster.metadata.WeightedRoutingMetadata;
@@ -32,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -198,7 +196,6 @@ public class ClusterMetadataManifestTests extends OpenSearchTestCase {
                 new ClusterStateDiffManifest(
                     RemoteClusterStateServiceTests.generateClusterStateWithOneIndex().build(),
                     ClusterState.EMPTY_STATE,
-                    null,
                     "indicesRoutingDiffPath"
                 )
             )
@@ -532,7 +529,6 @@ public class ClusterMetadataManifestTests extends OpenSearchTestCase {
                 new ClusterStateDiffManifest(
                     RemoteClusterStateServiceTests.generateClusterStateWithOneIndex().build(),
                     ClusterState.EMPTY_STATE,
-                    null,
                     null
                 )
             )
@@ -551,9 +547,7 @@ public class ClusterMetadataManifestTests extends OpenSearchTestCase {
     public void testClusterMetadataManifestXContentV3() throws IOException {
         UploadedIndexMetadata uploadedIndexMetadata = new UploadedIndexMetadata("test-index", "test-uuid", "/test/upload/path");
         UploadedMetadataAttribute uploadedMetadataAttribute = new UploadedMetadataAttribute("attribute_name", "testing_attribute");
-        final StringKeyDiffProvider<IndexRoutingTable> routingTableIncrementalDiff = Mockito.mock(
-            StringKeyDiffProvider.class
-        );
+        final StringKeyDiffProvider<IndexRoutingTable> routingTableIncrementalDiff = Mockito.mock(StringKeyDiffProvider.class);
         ClusterMetadataManifest originalManifest = ClusterMetadataManifest.builder()
             .clusterTerm(1L)
             .stateVersion(1L)
@@ -598,7 +592,6 @@ public class ClusterMetadataManifestTests extends OpenSearchTestCase {
                 new ClusterStateDiffManifest(
                     RemoteClusterStateServiceTests.generateClusterStateWithOneIndex().build(),
                     ClusterState.EMPTY_STATE,
-                    routingTableIncrementalDiff,
                     uploadedMetadataAttribute.getUploadedFilename()
                 )
             )

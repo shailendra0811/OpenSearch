@@ -8,7 +8,6 @@
 
 package org.opensearch.cluster.routing;
 
-import org.junit.Before;
 import org.opensearch.Version;
 import org.opensearch.cluster.ClusterState;
 import org.opensearch.cluster.Diff;
@@ -19,10 +18,11 @@ import org.opensearch.cluster.node.DiscoveryNodes;
 import org.opensearch.cluster.routing.allocation.AllocationService;
 import org.opensearch.cluster.routing.allocation.decider.ThrottlingAllocationDecider;
 import org.opensearch.common.settings.Settings;
+import org.junit.Before;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.equalTo;
 
 public class RoutingTableDiffTests extends OpenSearchAllocationTestCase {
 
@@ -59,8 +59,8 @@ public class RoutingTableDiffTests extends OpenSearchAllocationTestCase {
         Metadata metadata = Metadata.builder().put(createIndexMetadata(TEST_INDEX_1)).put(createIndexMetadata(TEST_INDEX_2)).build();
 
         RoutingTable testRoutingTable = new RoutingTable.Builder().add(
-                new IndexRoutingTable.Builder(metadata.index(TEST_INDEX_1).getIndex()).initializeAsNew(metadata.index(TEST_INDEX_1)).build()
-            )
+            new IndexRoutingTable.Builder(metadata.index(TEST_INDEX_1).getIndex()).initializeAsNew(metadata.index(TEST_INDEX_1)).build()
+        )
             .add(
                 new IndexRoutingTable.Builder(metadata.index(TEST_INDEX_2).getIndex()).initializeAsNew(metadata.index(TEST_INDEX_2)).build()
             )
@@ -101,27 +101,25 @@ public class RoutingTableDiffTests extends OpenSearchAllocationTestCase {
         assertThat(clusterState.routingTable().shardsWithState(ShardRoutingState.UNASSIGNED).size(), is(this.totalNumberOfShards));
         initPrimaries();
         int expectedUnassignedShardCount = this.totalNumberOfShards - 2 * this.numberOfShards;
-        assertThat(
-            clusterState.routingTable().shardsWithState(ShardRoutingState.UNASSIGNED).size(),
-            is(expectedUnassignedShardCount)
-        );
+        assertThat(clusterState.routingTable().shardsWithState(ShardRoutingState.UNASSIGNED).size(), is(expectedUnassignedShardCount));
         assertThat(clusterState.routingTable().shardsWithState(ShardRoutingState.INITIALIZING).size(), is(2 * this.numberOfShards));
         Metadata metadata = Metadata.builder().put(createIndexMetadata(TEST_INDEX_1)).put(createIndexMetadata(TEST_INDEX_2)).build();
         ClusterState oldClusterState = clusterState;
 
-        //create index routing table for TEST_INDEX_3
+        // create index routing table for TEST_INDEX_3
         metadata = Metadata.builder(metadata).put(createIndexMetadata(TEST_INDEX_3)).build();
-        RoutingTable testRoutingTable = new RoutingTable.Builder(clusterState.routingTable())
-            .add(new IndexRoutingTable.Builder(metadata.index(TEST_INDEX_3).getIndex()).initializeAsNew(metadata.index(TEST_INDEX_3)).build()
-            )
-            .build();
+        RoutingTable testRoutingTable = new RoutingTable.Builder(clusterState.routingTable()).add(
+            new IndexRoutingTable.Builder(metadata.index(TEST_INDEX_3).getIndex()).initializeAsNew(metadata.index(TEST_INDEX_3)).build()
+        ).build();
         this.clusterState = ClusterState.builder(org.opensearch.cluster.ClusterName.CLUSTER_NAME_SETTING.getDefault(Settings.EMPTY))
             .metadata(metadata)
             .routingTable(testRoutingTable)
             .build();
         this.totalNumberOfShards = this.shardsPerIndex * 3;
-        assertThat(clusterState.routingTable().shardsWithState(ShardRoutingState.UNASSIGNED).size(),
-            is(expectedUnassignedShardCount + this.shardsPerIndex));
+        assertThat(
+            clusterState.routingTable().shardsWithState(ShardRoutingState.UNASSIGNED).size(),
+            is(expectedUnassignedShardCount + this.shardsPerIndex)
+        );
         Diff<RoutingTable> fullDiff = clusterState.routingTable().diff(oldClusterState.getRoutingTable());
         Diff<RoutingTable> incrementalDiff = clusterState.routingTable().incrementalDiff(oldClusterState.getRoutingTable());
         RoutingTable newRoutingTable = incrementalDiff.apply(oldClusterState.getRoutingTable());
@@ -140,26 +138,23 @@ public class RoutingTableDiffTests extends OpenSearchAllocationTestCase {
         assertThat(clusterState.routingTable().shardsWithState(ShardRoutingState.UNASSIGNED).size(), is(this.totalNumberOfShards));
         initPrimaries();
         int expectedUnassignedShardCount = this.totalNumberOfShards - 2 * this.numberOfShards;
-        assertThat(
-            clusterState.routingTable().shardsWithState(ShardRoutingState.UNASSIGNED).size(),
-            is(expectedUnassignedShardCount)
-        );
+        assertThat(clusterState.routingTable().shardsWithState(ShardRoutingState.UNASSIGNED).size(), is(expectedUnassignedShardCount));
         assertThat(clusterState.routingTable().shardsWithState(ShardRoutingState.INITIALIZING).size(), is(2 * this.numberOfShards));
         Metadata metadata = Metadata.builder().put(createIndexMetadata(TEST_INDEX_1)).put(createIndexMetadata(TEST_INDEX_2)).build();
         ClusterState oldClusterState = clusterState;
 
-        //delete index routing table for TEST_INDEX_1
+        // delete index routing table for TEST_INDEX_1
         metadata = Metadata.builder(metadata).put(createIndexMetadata(TEST_INDEX_3)).build();
-        RoutingTable testRoutingTable = new RoutingTable.Builder(clusterState.routingTable())
-            .remove(TEST_INDEX_1)
-            .build();
+        RoutingTable testRoutingTable = new RoutingTable.Builder(clusterState.routingTable()).remove(TEST_INDEX_1).build();
         this.clusterState = ClusterState.builder(org.opensearch.cluster.ClusterName.CLUSTER_NAME_SETTING.getDefault(Settings.EMPTY))
             .metadata(metadata)
             .routingTable(testRoutingTable)
             .build();
         this.totalNumberOfShards = this.shardsPerIndex;
-        assertThat(clusterState.routingTable().shardsWithState(ShardRoutingState.UNASSIGNED).size(),
-            is(expectedUnassignedShardCount - this.numberOfShards * this.numberOfReplicas));
+        assertThat(
+            clusterState.routingTable().shardsWithState(ShardRoutingState.UNASSIGNED).size(),
+            is(expectedUnassignedShardCount - this.numberOfShards * this.numberOfReplicas)
+        );
         Diff<RoutingTable> fullDiff = clusterState.routingTable().diff(oldClusterState.getRoutingTable());
         Diff<RoutingTable> incrementalDiff = clusterState.routingTable().incrementalDiff(oldClusterState.getRoutingTable());
         RoutingTable newRoutingTable = incrementalDiff.apply(oldClusterState.getRoutingTable());
@@ -178,30 +173,28 @@ public class RoutingTableDiffTests extends OpenSearchAllocationTestCase {
         assertThat(clusterState.routingTable().shardsWithState(ShardRoutingState.UNASSIGNED).size(), is(this.totalNumberOfShards));
         initPrimaries();
         int expectedUnassignedShardCount = this.totalNumberOfShards - 2 * this.numberOfShards;
-        assertThat(
-            clusterState.routingTable().shardsWithState(ShardRoutingState.UNASSIGNED).size(),
-            is(expectedUnassignedShardCount)
-        );
+        assertThat(clusterState.routingTable().shardsWithState(ShardRoutingState.UNASSIGNED).size(), is(expectedUnassignedShardCount));
         assertThat(clusterState.routingTable().shardsWithState(ShardRoutingState.INITIALIZING).size(), is(2 * this.numberOfShards));
         Metadata metadata = Metadata.builder().put(createIndexMetadata(TEST_INDEX_1)).put(createIndexMetadata(TEST_INDEX_2)).build();
         ClusterState oldClusterState = clusterState;
 
-        //create index routing table for TEST_INDEX_3
+        // create index routing table for TEST_INDEX_3
         metadata = Metadata.builder(metadata).put(createIndexMetadata(TEST_INDEX_3)).build();
-        RoutingTable testRoutingTable = new RoutingTable.Builder(clusterState.routingTable())
-            .add(new IndexRoutingTable.Builder(metadata.index(TEST_INDEX_3).getIndex()).initializeAsNew(metadata.index(TEST_INDEX_3)).build()
-            )
-            .build();
+        RoutingTable testRoutingTable = new RoutingTable.Builder(clusterState.routingTable()).add(
+            new IndexRoutingTable.Builder(metadata.index(TEST_INDEX_3).getIndex()).initializeAsNew(metadata.index(TEST_INDEX_3)).build()
+        ).build();
         this.clusterState = ClusterState.builder(org.opensearch.cluster.ClusterName.CLUSTER_NAME_SETTING.getDefault(Settings.EMPTY))
             .metadata(metadata)
             .routingTable(testRoutingTable)
             .build();
         this.totalNumberOfShards = this.shardsPerIndex * 3;
-        assertThat(clusterState.routingTable().shardsWithState(ShardRoutingState.UNASSIGNED).size(),
-            is(expectedUnassignedShardCount + this.shardsPerIndex));
+        assertThat(
+            clusterState.routingTable().shardsWithState(ShardRoutingState.UNASSIGNED).size(),
+            is(expectedUnassignedShardCount + this.shardsPerIndex)
+        );
         initPrimaries();
         clusterState = startRandomInitializingShard(clusterState, ALLOCATION_SERVICE, TEST_INDEX_2);
-        //assertThat(clusterState.routingTable().shardsWithState(ShardRoutingState.INITIALIZING).size(), is(2 * this.numberOfShards + 1));
+        // assertThat(clusterState.routingTable().shardsWithState(ShardRoutingState.INITIALIZING).size(), is(2 * this.numberOfShards + 1));
         Diff<RoutingTable> fullDiff = clusterState.routingTable().diff(oldClusterState.getRoutingTable());
         Diff<RoutingTable> incrementalDiff = clusterState.routingTable().incrementalDiff(oldClusterState.getRoutingTable());
         RoutingTable newRoutingTable = incrementalDiff.apply(oldClusterState.getRoutingTable());
@@ -220,21 +213,22 @@ public class RoutingTableDiffTests extends OpenSearchAllocationTestCase {
         assertThat(clusterState.routingTable().shardsWithState(ShardRoutingState.UNASSIGNED).size(), is(this.totalNumberOfShards));
         initPrimaries();
         int expectedUnassignedShardCount = this.totalNumberOfShards - 2 * this.numberOfShards;
-        assertThat(
-            clusterState.routingTable().shardsWithState(ShardRoutingState.UNASSIGNED).size(),
-            is(expectedUnassignedShardCount)
-        );
+        assertThat(clusterState.routingTable().shardsWithState(ShardRoutingState.UNASSIGNED).size(), is(expectedUnassignedShardCount));
         assertThat(clusterState.routingTable().shardsWithState(ShardRoutingState.INITIALIZING).size(), is(2 * this.numberOfShards));
         ClusterState oldClusterState = clusterState;
 
-        //update replica count for TEST_INDEX_1
+        // update replica count for TEST_INDEX_1
         RoutingTable updatedRoutingTable = RoutingTable.builder(clusterState.routingTable())
-            .updateNumberOfReplicas(this.numberOfReplicas + 1, new String[]{TEST_INDEX_1})
+            .updateNumberOfReplicas(this.numberOfReplicas + 1, new String[] { TEST_INDEX_1 })
             .build();
-        Metadata metadata = Metadata.builder(clusterState.metadata()).updateNumberOfReplicas(this.numberOfReplicas + 1, new String[]{TEST_INDEX_1}).build();
+        Metadata metadata = Metadata.builder(clusterState.metadata())
+            .updateNumberOfReplicas(this.numberOfReplicas + 1, new String[] { TEST_INDEX_1 })
+            .build();
         clusterState = ClusterState.builder(clusterState).routingTable(updatedRoutingTable).metadata(metadata).build();
-        assertThat(clusterState.routingTable().shardsWithState(ShardRoutingState.UNASSIGNED).size(),
-            is(expectedUnassignedShardCount + this.numberOfShards));
+        assertThat(
+            clusterState.routingTable().shardsWithState(ShardRoutingState.UNASSIGNED).size(),
+            is(expectedUnassignedShardCount + this.numberOfShards)
+        );
         Diff<RoutingTable> fullDiff = clusterState.routingTable().diff(oldClusterState.getRoutingTable());
         Diff<RoutingTable> incrementalDiff = clusterState.routingTable().incrementalDiff(oldClusterState.getRoutingTable());
         RoutingTable newRoutingTable = incrementalDiff.apply(oldClusterState.getRoutingTable());
@@ -253,21 +247,22 @@ public class RoutingTableDiffTests extends OpenSearchAllocationTestCase {
         assertThat(clusterState.routingTable().shardsWithState(ShardRoutingState.UNASSIGNED).size(), is(this.totalNumberOfShards));
         initPrimaries();
         int expectedUnassignedShardCount = this.totalNumberOfShards - 2 * this.numberOfShards;
-        assertThat(
-            clusterState.routingTable().shardsWithState(ShardRoutingState.UNASSIGNED).size(),
-            is(expectedUnassignedShardCount)
-        );
+        assertThat(clusterState.routingTable().shardsWithState(ShardRoutingState.UNASSIGNED).size(), is(expectedUnassignedShardCount));
         assertThat(clusterState.routingTable().shardsWithState(ShardRoutingState.INITIALIZING).size(), is(2 * this.numberOfShards));
         ClusterState oldClusterState = clusterState;
 
-        //update replica count for TEST_INDEX_1
+        // update replica count for TEST_INDEX_1
         RoutingTable updatedRoutingTable = RoutingTable.builder(clusterState.routingTable())
-            .updateNumberOfReplicas(this.numberOfReplicas - 1, new String[]{TEST_INDEX_1})
+            .updateNumberOfReplicas(this.numberOfReplicas - 1, new String[] { TEST_INDEX_1 })
             .build();
-        Metadata metadata = Metadata.builder(clusterState.metadata()).updateNumberOfReplicas(this.numberOfReplicas - 1, new String[]{TEST_INDEX_1}).build();
+        Metadata metadata = Metadata.builder(clusterState.metadata())
+            .updateNumberOfReplicas(this.numberOfReplicas - 1, new String[] { TEST_INDEX_1 })
+            .build();
         clusterState = ClusterState.builder(clusterState).routingTable(updatedRoutingTable).metadata(metadata).build();
-        assertThat(clusterState.routingTable().shardsWithState(ShardRoutingState.UNASSIGNED).size(),
-            is(expectedUnassignedShardCount - this.numberOfShards));
+        assertThat(
+            clusterState.routingTable().shardsWithState(ShardRoutingState.UNASSIGNED).size(),
+            is(expectedUnassignedShardCount - this.numberOfShards)
+        );
         Diff<RoutingTable> fullDiff = clusterState.routingTable().diff(oldClusterState.getRoutingTable());
         Diff<RoutingTable> incrementalDiff = clusterState.routingTable().incrementalDiff(oldClusterState.getRoutingTable());
         RoutingTable newRoutingTable = incrementalDiff.apply(oldClusterState.getRoutingTable());

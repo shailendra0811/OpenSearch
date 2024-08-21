@@ -13,7 +13,6 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.message.ParameterizedMessage;
 import org.opensearch.action.LatchedActionListener;
 import org.opensearch.cluster.Diff;
-import org.opensearch.cluster.DiffableUtils;
 import org.opensearch.cluster.routing.IndexRoutingTable;
 import org.opensearch.cluster.routing.RoutingTable;
 import org.opensearch.cluster.routing.RoutingTableIncrementalDiff;
@@ -96,10 +95,7 @@ public class InternalRemoteRoutingTableService extends AbstractLifecycleComponen
      * @return incremental diff of the previous and current routing table
      */
     @Override
-    public StringKeyDiffProvider<IndexRoutingTable> getIndicesRoutingMapDiff(
-        RoutingTable before,
-        RoutingTable after
-    ) {
+    public StringKeyDiffProvider<IndexRoutingTable> getIndicesRoutingMapDiff(RoutingTable before, RoutingTable after) {
         return new RoutingTableIncrementalDiff(before, after);
     }
 
@@ -138,23 +134,21 @@ public class InternalRemoteRoutingTableService extends AbstractLifecycleComponen
         String clusterUUID,
         long term,
         long version,
-        RoutingTable routingTableBefore,
-        RoutingTable routingTableAfter,
+        StringKeyDiffProvider<IndexRoutingTable> routingTableDiff,
         LatchedActionListener<ClusterMetadataManifest.UploadedMetadata> latchedActionListener
     ) {
-        RoutingTableIncrementalDiff routingTableIncrementalDiff = new RoutingTableIncrementalDiff(routingTableBefore, routingTableAfter);
         RemoteRoutingTableDiff remoteRoutingTableDiff = new RemoteRoutingTableDiff(
-                routingTableIncrementalDiff,
-                clusterUUID,
-                compressor,
-                term,
-                version
+            (RoutingTableIncrementalDiff) routingTableDiff,
+            clusterUUID,
+            compressor,
+            term,
+            version
         );
         ActionListener<Void> completionListener = ActionListener.wrap(
-                resp -> latchedActionListener.onResponse(remoteRoutingTableDiff.getUploadedMetadata()),
-                ex -> latchedActionListener.onFailure(
-                        new RemoteStateTransferException("Exception in writing index routing diff to remote store", ex)
-                )
+            resp -> latchedActionListener.onResponse(remoteRoutingTableDiff.getUploadedMetadata()),
+            ex -> latchedActionListener.onFailure(
+                new RemoteStateTransferException("Exception in writing index routing diff to remote store", ex)
+            )
         );
 
         remoteRoutingTableDiffStore.writeAsync(remoteRoutingTableDiff, completionListener);

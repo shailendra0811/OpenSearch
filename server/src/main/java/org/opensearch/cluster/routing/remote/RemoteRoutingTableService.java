@@ -10,17 +10,14 @@ package org.opensearch.cluster.routing.remote;
 
 import org.opensearch.action.LatchedActionListener;
 import org.opensearch.cluster.Diff;
-import org.opensearch.cluster.DiffableUtils;
 import org.opensearch.cluster.routing.IndexRoutingTable;
 import org.opensearch.cluster.routing.RoutingTable;
 import org.opensearch.cluster.routing.StringKeyDiffProvider;
 import org.opensearch.common.lifecycle.LifecycleComponent;
-
 import org.opensearch.gateway.remote.ClusterMetadataManifest;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 /**
  * A Service which provides APIs to upload and download routing table from remote store.
@@ -48,10 +45,7 @@ public interface RemoteRoutingTableService extends LifecycleComponent {
         List<ClusterMetadataManifest.UploadedIndexMetadata> allIndicesRouting
     );
 
-    StringKeyDiffProvider<IndexRoutingTable> getIndicesRoutingMapDiff(
-        RoutingTable before,
-        RoutingTable after
-    );
+    StringKeyDiffProvider<IndexRoutingTable> getIndicesRoutingMapDiff(RoutingTable before, RoutingTable after);
 
     void getAsyncIndexRoutingWriteAction(
         String clusterUUID,
@@ -65,8 +59,7 @@ public interface RemoteRoutingTableService extends LifecycleComponent {
         String clusterUUID,
         long term,
         long version,
-        RoutingTable routingTableBefore,
-        RoutingTable routingTableAfter,
+        StringKeyDiffProvider<IndexRoutingTable> routingTableDiff,
         LatchedActionListener<ClusterMetadataManifest.UploadedMetadata> latchedActionListener
     );
 

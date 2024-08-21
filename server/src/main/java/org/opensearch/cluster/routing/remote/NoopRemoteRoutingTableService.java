@@ -31,10 +31,7 @@ public class NoopRemoteRoutingTableService extends AbstractLifecycleComponent im
     }
 
     @Override
-    public StringKeyDiffProvider<IndexRoutingTable> getIndicesRoutingMapDiff(
-        RoutingTable before,
-        RoutingTable after
-    ) {
+    public StringKeyDiffProvider<IndexRoutingTable> getIndicesRoutingMapDiff(RoutingTable before, RoutingTable after) {
         return new RoutingTableIncrementalDiff(before, after);
     }
 
@@ -54,8 +51,7 @@ public class NoopRemoteRoutingTableService extends AbstractLifecycleComponent im
         String clusterUUID,
         long term,
         long version,
-        RoutingTable routingTableBefore,
-        RoutingTable routingTableAfter,
+        StringKeyDiffProvider<IndexRoutingTable> routingTableDiff,
         LatchedActionListener<ClusterMetadataManifest.UploadedMetadata> latchedActionListener
     ) {
         // noop

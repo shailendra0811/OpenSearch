@@ -187,7 +187,11 @@ public abstract class OpenSearchAllocationTestCase extends OpenSearchTestCase {
         return startInitialisingShardsAndReroute(strategy, clusterState, initializingShards);
     }
 
-    private static ClusterState startInitialisingShardsAndReroute(AllocationService strategy, ClusterState clusterState, List<ShardRouting> initializingShards) {
+    private static ClusterState startInitialisingShardsAndReroute(
+        AllocationService strategy,
+        ClusterState clusterState,
+        List<ShardRouting> initializingShards
+    ) {
         if (initializingShards.isEmpty()) {
             return clusterState;
         }
