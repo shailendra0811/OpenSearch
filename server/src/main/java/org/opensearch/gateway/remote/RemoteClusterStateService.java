@@ -521,10 +521,10 @@ public class RemoteClusterStateService implements Closeable {
             + (uploadDiscoveryNodes ? 1 : 0) + (uploadClusterBlock ? 1 : 0) + (uploadTransientSettingMetadata ? 1 : 0)
             + clusterStateCustomToUpload.size() + (uploadHashesOfConsistentSettings ? 1 : 0) + indicesRoutingToUpload.size()
             + ((routingTableDiff != null
-            && routingTableDiff.provideDiff() != null
-            && (!routingTableDiff.provideDiff().getDiffs().isEmpty()
-            || !routingTableDiff.provideDiff().getDeletes().isEmpty()
-            || !routingTableDiff.provideDiff().getUpserts().isEmpty()))? 1: 0);
+                && routingTableDiff.provideDiff() != null
+                && (!routingTableDiff.provideDiff().getDiffs().isEmpty()
+                    || !routingTableDiff.provideDiff().getDeletes().isEmpty()
+                    || !routingTableDiff.provideDiff().getUpserts().isEmpty())) ? 1 : 0);
         CountDownLatch latch = new CountDownLatch(totalUploadTasks);
         List<String> uploadTasks = Collections.synchronizedList(new ArrayList<>(totalUploadTasks));
         Map<String, ClusterMetadataManifest.UploadedMetadata> results = new ConcurrentHashMap<>(totalUploadTasks);
