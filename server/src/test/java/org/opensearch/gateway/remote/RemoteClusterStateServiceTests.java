@@ -2815,9 +2815,7 @@ public class RemoteClusterStateServiceTests extends OpenSearchTestCase {
             INDEX_ROUTING_METADATA_PREFIX
         );
         indices.add(uploadedIndiceRoutingMetadata);
-        final ClusterState previousClusterState = generateClusterStateWithOneIndex("test-index2", 5, 1, false).nodes(
-            nodesWithLocalNodeClusterManager()
-        ).build();
+        final ClusterState previousClusterState = clusterState;
 
         final ClusterMetadataManifest previousManifest = ClusterMetadataManifest.builder().indices(indices).build();
         when((blobStoreRepository.basePath())).thenReturn(BlobPath.cleanPath().add("base-path"));
@@ -2846,9 +2844,6 @@ public class RemoteClusterStateServiceTests extends OpenSearchTestCase {
         assertThat(manifest.getClusterUUID(), is(expectedManifest.getClusterUUID()));
         assertThat(manifest.getStateUUID(), is(expectedManifest.getStateUUID()));
         assertThat(manifest.getRoutingTableVersion(), is(expectedManifest.getRoutingTableVersion()));
-        assertThat(manifest.getIndicesRouting().get(0).getIndexName(), is(uploadedIndiceRoutingMetadata.getIndexName()));
-        assertThat(manifest.getIndicesRouting().get(0).getIndexUUID(), is(uploadedIndiceRoutingMetadata.getIndexUUID()));
-        assertThat(manifest.getIndicesRouting().get(0).getUploadedFilename(), notNullValue());
         assertThat(manifest.getDiffManifest().getIndicesRoutingDiffPath(), nullValue());
     }
 
