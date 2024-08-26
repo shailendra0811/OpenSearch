@@ -607,7 +607,7 @@ public class RemoteClusterStateService implements Closeable {
                 new RemoteDiscoveryNodes(
                     clusterState.nodes(),
                     clusterState.version(),
-                    clusterState.stateUUID(),
+                    clusterState.metadata().clusterUUID(),
                     blobStoreRepository.getCompressor()
                 ),
                 listener
