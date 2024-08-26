@@ -25,6 +25,7 @@ import org.opensearch.cluster.metadata.TemplatesMetadata;
 import org.opensearch.cluster.node.DiscoveryNode;
 import org.opensearch.cluster.node.DiscoveryNodes;
 import org.opensearch.cluster.routing.RoutingTable;
+import org.opensearch.cluster.routing.StringKeyDiffProvider;
 import org.opensearch.cluster.routing.remote.InternalRemoteRoutingTableService;
 import org.opensearch.cluster.routing.remote.NoopRemoteRoutingTableService;
 import org.opensearch.cluster.service.ClusterService;
@@ -542,7 +543,7 @@ public class RemoteClusterStateServiceTests extends OpenSearchTestCase {
             RemoteStateTransferException.class,
             () -> spiedService.writeFullMetadata(clusterState, randomAlphaOfLength(10))
         );
-        assertTrue(ex.getMessage().contains("Timed out waiting for transfer of following metadata to complete"));
+        assertTrue(ex.getMessage().contains("Timed out waiting for transfer"));
     }
 
     public void testWriteFullMetadataInParallelFailureForIndexMetadata() throws IOException {
@@ -686,7 +687,7 @@ public class RemoteClusterStateServiceTests extends OpenSearchTestCase {
                 eq(Collections.emptyMap()),
                 eq(false),
                 eq(Collections.emptyList()),
-                eq(null)
+                Mockito.any(StringKeyDiffProvider.class)
             );
 
         assertThat(manifestInfo.getManifestFileName(), notNullValue());
@@ -767,7 +768,7 @@ public class RemoteClusterStateServiceTests extends OpenSearchTestCase {
                 eq(Collections.emptyMap()),
                 eq(true),
                 anyList(),
-                eq(null)
+                Mockito.any(StringKeyDiffProvider.class)
             );
 
         assertThat(manifestInfo.getManifestFileName(), notNullValue());
