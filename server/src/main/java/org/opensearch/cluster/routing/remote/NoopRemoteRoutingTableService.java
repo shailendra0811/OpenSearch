@@ -18,7 +18,6 @@ import org.opensearch.common.lifecycle.AbstractLifecycleComponent;
 import org.opensearch.gateway.remote.ClusterMetadataManifest;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 /**
