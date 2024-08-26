@@ -73,18 +73,6 @@ public class RemoteRoutingTableDiff extends AbstractClusterMetadataWriteableBlob
     }
 
     /**
-     * Constructs a new RemoteRoutingTableDiff with the given differences.
-     *
-     * @param routingTableIncrementalDiff a RoutingTableIncrementalDiff object containing the differences of {@link IndexRoutingTable}.
-     * @param clusterUUID the cluster UUID.
-     * @param compressor the compressor to be used.
-     */
-    public RemoteRoutingTableDiff(RoutingTableIncrementalDiff routingTableIncrementalDiff, String clusterUUID, Compressor compressor) {
-        super(clusterUUID, compressor);
-        this.routingTableIncrementalDiff = routingTableIncrementalDiff;
-    }
-
-    /**
      * Constructs a new RemoteIndexRoutingTableDiff with the given blob name, cluster UUID, and compressor.
      *
      * @param blobName the name of the blob.
