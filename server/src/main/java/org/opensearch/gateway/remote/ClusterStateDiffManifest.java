@@ -235,27 +235,25 @@ public class ClusterStateDiffManifest implements ToXContentFragment, Writeable {
         builder.endObject();
         builder.field(CLUSTER_BLOCKS_UPDATED_FIELD, clusterBlocksUpdated);
         builder.field(DISCOVERY_NODES_UPDATED_FIELD, discoveryNodesUpdated);
-        if (!indicesRoutingUpdated.isEmpty() || !indicesDeleted.isEmpty() || indicesRoutingDiffPath != null) {
-            builder.startObject(ROUTING_TABLE_DIFF);
-            if (!indicesRoutingUpdated.isEmpty()) {
-                builder.startArray(UPSERTS_FIELD);
-                for (String index : indicesRoutingUpdated) {
-                    builder.value(index);
-                }
-                builder.endArray();
+        builder.startObject(ROUTING_TABLE_DIFF);
+        if (!indicesRoutingUpdated.isEmpty()) {
+            builder.startArray(UPSERTS_FIELD);
+            for (String index : indicesRoutingUpdated) {
+                builder.value(index);
             }
-            if (!indicesDeleted.isEmpty()) {
-                builder.startArray(DELETES_FIELD);
-                for (String index : indicesRoutingDeleted) {
-                    builder.value(index);
-                }
-                builder.endArray();
-            }
-            if (indicesRoutingDiffPath != null) {
-                builder.field(DIFF_FIELD, indicesRoutingDiffPath);
-            }
-            builder.endObject();
+            builder.endArray();
         }
+        if (!indicesRoutingDeleted.isEmpty()) {
+            builder.startArray(DELETES_FIELD);
+            for (String index : indicesRoutingDeleted) {
+                builder.value(index);
+            }
+            builder.endArray();
+        }
+        if (indicesRoutingDiffPath != null) {
+            builder.field(DIFF_FIELD, indicesRoutingDiffPath);
+        }
+        builder.endObject();
         builder.startObject(CLUSTER_STATE_CUSTOM_DIFF_FIELD);
         builder.startArray(UPSERTS_FIELD);
         for (String custom : clusterStateCustomUpdated) {
@@ -354,10 +352,14 @@ public class ClusterStateDiffManifest implements ToXContentFragment, Writeable {
                         parser.nextToken();
                         switch (currentFieldName) {
                             case UPSERTS_FIELD:
-                                builder.indicesRoutingUpdated(convertListToString(parser.listOrderedMap()));
+                                if (codec_version == CODEC_V2 || codec_version == CODEC_V3) {
+                                    builder.indicesRoutingUpdated(convertListToString(parser.listOrderedMap()));
+                                }
                                 break;
                             case DELETES_FIELD:
-                                builder.indicesRoutingDeleted(convertListToString(parser.listOrderedMap()));
+                                if (codec_version == CODEC_V2 || codec_version == CODEC_V3){
+                                    builder.indicesRoutingDeleted(convertListToString(parser.listOrderedMap()));
+                                }
                                 break;
                             case DIFF_FIELD:
                                 if (codec_version >= CODEC_V3) {
@@ -715,7 +717,7 @@ public class ClusterStateDiffManifest implements ToXContentFragment, Writeable {
                 clusterBlocksUpdated,
                 discoveryNodesUpdated,
                 indicesRoutingUpdated,
-                indicesDeleted,
+                indicesRoutingDeleted,
                 indicesRoutingDiff,
                 hashesOfConsistentSettingsUpdated,
                 clusterStateCustomUpdated,

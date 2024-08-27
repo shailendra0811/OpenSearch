@@ -162,41 +162,41 @@ public class ClusterStateDiffManifestTests extends OpenSearchTestCase {
         }
     }
 
-//    public void testClusterStateWithRoutingTableDiffInDiffManifestXContentV4() throws IOException {
-//        ClusterState initialState = generateClusterStateWithOneIndex("test-index", 5, 1, true).nodes(nodesWithLocalNodeClusterManager())
-//            .build();
-//
-//        ClusterState updatedState = generateClusterStateWithOneIndex("test-index", 5, 2, false).nodes(nodesWithLocalNodeClusterManager())
-//            .build();
-//
-//        ClusterStateDiffManifest diffManifest = verifyRoutingTableDiffManifest(initialState, updatedState, CODEC_V4);
-//        final XContentBuilder builder = JsonXContent.contentBuilder();
-//        builder.startObject();
-//        diffManifest.toXContent(builder, ToXContent.EMPTY_PARAMS);
-//        builder.endObject();
-//        try (XContentParser parser = createParser(JsonXContent.jsonXContent, BytesReference.bytes(builder))) {
-//            final ClusterStateDiffManifest parsedManifest = ClusterStateDiffManifest.fromXContent(parser, CODEC_V4);
-//            assertEquals(diffManifest, parsedManifest);
-//        }
-//    }
-//
-//    public void testClusterStateWithRoutingTableDiffInDiffManifestXContentWithDeletesV4() throws IOException {
-//        ClusterState initialState = generateClusterStateWithOneIndex("test-index", 5, 1, true).nodes(nodesWithLocalNodeClusterManager())
-//            .build();
-//
-//        ClusterState updatedState = generateClusterStateWithOneIndex("test-index-1", 5, 2, false).nodes(nodesWithLocalNodeClusterManager())
-//            .build();
-//
-//        ClusterStateDiffManifest diffManifest = verifyRoutingTableDiffManifest(initialState, updatedState, CODEC_V4);
-//        final XContentBuilder builder = JsonXContent.contentBuilder();
-//        builder.startObject();
-//        diffManifest.toXContent(builder, ToXContent.EMPTY_PARAMS);
-//        builder.endObject();
-//        try (XContentParser parser = createParser(JsonXContent.jsonXContent, BytesReference.bytes(builder))) {
-//            final ClusterStateDiffManifest parsedManifest = ClusterStateDiffManifest.fromXContent(parser, CODEC_V4);
-//            assertEquals(diffManifest, parsedManifest);
-//        }
-//    }
+    public void testClusterStateWithRoutingTableDiffInDiffManifestXContentV4() throws IOException {
+        ClusterState initialState = generateClusterStateWithOneIndex("test-index", 5, 1, true).nodes(nodesWithLocalNodeClusterManager())
+            .build();
+
+        ClusterState updatedState = generateClusterStateWithOneIndex("test-index", 5, 2, false).nodes(nodesWithLocalNodeClusterManager())
+            .build();
+
+        ClusterStateDiffManifest diffManifest = verifyRoutingTableDiffManifest(initialState, updatedState, CODEC_V4);
+        final XContentBuilder builder = JsonXContent.contentBuilder();
+        builder.startObject();
+        diffManifest.toXContent(builder, ToXContent.EMPTY_PARAMS);
+        builder.endObject();
+        try (XContentParser parser = createParser(JsonXContent.jsonXContent, BytesReference.bytes(builder))) {
+            final ClusterStateDiffManifest parsedManifest = ClusterStateDiffManifest.fromXContent(parser, CODEC_V4);
+            assertEquals(diffManifest, parsedManifest);
+        }
+    }
+
+    public void testClusterStateWithRoutingTableDiffInDiffManifestXContentWithDeletesV4() throws IOException {
+        ClusterState initialState = generateClusterStateWithOneIndex("test-index", 5, 1, true).nodes(nodesWithLocalNodeClusterManager())
+            .build();
+
+        ClusterState updatedState = generateClusterStateWithOneIndex("test-index-1", 5, 2, false).nodes(nodesWithLocalNodeClusterManager())
+            .build();
+
+        ClusterStateDiffManifest diffManifest = verifyRoutingTableDiffManifest(initialState, updatedState, CODEC_V4);
+        final XContentBuilder builder = JsonXContent.contentBuilder();
+        builder.startObject();
+        diffManifest.toXContent(builder, ToXContent.EMPTY_PARAMS);
+        builder.endObject();
+        try (XContentParser parser = createParser(JsonXContent.jsonXContent, BytesReference.bytes(builder))) {
+            final ClusterStateDiffManifest parsedManifest = ClusterStateDiffManifest.fromXContent(parser, CODEC_V4);
+            assertEquals(diffManifest, parsedManifest);
+        }
+    }
 
     private ClusterStateDiffManifest verifyRoutingTableDiffManifest(
         ClusterState previousState,
